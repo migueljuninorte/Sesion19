@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{titulo}}</title>
+    </head>
+    <body>
+        <table border="1">
+               <tr>
+                <th>Id</th>
+                <th>Id usuario envío</th>
+                <th>Usuario envío</th>
+                <th>Id Usuario recibo</th>
+                <th>Usuario recibo</th>
+                <th>Asunto</th>
+                <th>Mensaje</th>
+            </tr>
+            {% for message in data %}
+                <!--<tr>
+                    <td>{{message[0]}}</td>
+                    <td>{{message[1]}}</td>
+                    <td>{{message[2]}}</td>
+                    <td>{{message[3]}}</td>
+                    <td>{{message[4]}}</td>
+                    <td>{{message[5]}}</td>
+                    <td>{{message[6]}}</td>
+                </tr>-->
+                <tr>
+                    {% for i in message: %}
+                    <td>
+                        {{i}}
+                    </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <a href="{{ url_for('descargar_mensajes') }}">Descargar</a>
+    </body>
+</html>

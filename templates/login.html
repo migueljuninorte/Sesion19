@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>Iniciar Sesión</h1>
+<script src="{{ url_for('static', filename='js/validacion.js') }}"></script>
+{% endblock %}
+{% block content %}
+<form name="loginForm" method="post" action="{{ url_for('login') }}">
+    <label for="usuario">Usuario</label>
+    <input name="usuario" id="usuario" >
+    <label for="password">Contraseña</label>
+    <input type="password" name="password" id="password" >
+    <img src="{{ url_for('static', filename='images/show_pwd.png') }}" onmouseover="mostrarPassword();" onmouseout="ocultarPassword();" />
+    <input type="submit" value="Iniciar Sesion">
+  </form>
+
+{% endblock %}

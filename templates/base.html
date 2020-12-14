@@ -1,0 +1,27 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} Mensajería</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/miEstilo.css') }}">
+<nav>
+  <h1>Mensajería</h1>
+  <ul>
+    {% if g.user %}
+      <li><a class="action" href="{{ url_for('downloadpdf') }}">Descargar doc pdf</a>
+      <li><a class="action" href="{{ url_for('downloadimage') }}">Descargar imagen</a>
+      <li><a class="action" href="{{ url_for('mensajes') }}">Mensajes</a>
+      <li><a href="{{ url_for('logout') }}">Cerrar Sesión</a>
+    {% else %}
+      <li><a href="{{ url_for('register') }}">Registrarse</a>
+      <li><a href="{{ url_for('login') }}">Iniciar Sesión</a>
+    {% endif %}
+      <li><a href="{{ url_for('contactUs') }}">Contactenos</a>
+  </ul>
+</nav>
+<section class="content">
+  <header>
+    {% block header %}{% endblock %}
+  </header>
+  {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</section>
