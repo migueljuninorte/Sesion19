@@ -5,9 +5,14 @@
 {% block content %}
   <form method="post" action="{{url_for('send')}}">
     <label for="para">Para</label>
-    <input name="para" id="para"  required>
+    <!--<input name="para" id="para"  required>-->
+    <select name="para" id="para">
+      {% for u in users: %}
+        <option value="{{u[0]}}">{{u[0]}}</option>
+      {% endfor %}
+    </select>
     <label for="asunto">Asunto</label>
-    <input name="asunto" id=asunto"  required>
+    <input name="asunto" id="asunto"  required>
     <label for="mensaje">Mensaje</label>
     <textarea name="mensaje" id="mensaje" required ></textarea>
     <input type="submit" value="send">

@@ -7,6 +7,8 @@ path_wkhtmltopdf = 'venv\\include\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
 config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 resultado = {}
 
+from werkzeug.security import generate_password_hash, check_password_hash #Libería PBK
+
 import utils
 from db import get_db, close_db
 from formularios import Contactenos
@@ -19,7 +21,6 @@ app.secret_key = os.urandom( 24 )
 
 @app.route( '/' )
 def index():
-    
     if g.user:
         return redirect( url_for( 'send' ) )
     return render_template( 'login.html' )
@@ -56,10 +57,12 @@ def register():
                 error = 'El correo ya existe'.format( email )
                 flash( error )
                 return render_template( 'register.html' )
+            
+            hashPassword = generate_password_hash(password) #Generar hash+salt+PBK
 
             db.execute(
-                'INSERT INTO usuario (usuario, correo, contraseña) VALUES (?,?,?)',
-                (username, email, password)
+                'INSERT INTO usuarios (usuario, correo, contraseña) VALUES (?,?,?)',
+                (username, email, hashPassword)
             )
             db.commit()
 
@@ -76,6 +79,10 @@ def register():
 @app.route( '/login', methods=('GET', 'POST') )
 def login():
     try:
+        if request.cookies.get('uid'):
+            g.user = request.cookies.get('uid')
+            session['user_id'] = request.cookies.get('uid')
+
         if g.user:
             return redirect( url_for( 'send' ) )
         if request.method == 'POST':
@@ -95,15 +102,22 @@ def login():
                 return render_template( 'login.html' )
 
             user = db.execute(
-                'SELECT * FROM usuarios WHERE usuario = ? AND contraseña = ?', (username, password)
+                'SELECT * FROM usuarios WHERE usuario = ?', (username, )
             ).fetchone()
 
             if user is None:
                 error = 'Usuario o contraseña inválidos'
             else:
-                session.clear() #limpiar la sesión
-                session['user_id'] = user[0]
-                return redirect( url_for( 'send' ) )
+                if check_password_hash(user['contraseña'],password):
+                    session.clear() #limpiar la sesión
+                    userid = user[0]
+                    session['user_id'] = userid #creación de sesión
+                    #creación de cookies
+                    resp = make_response(redirect( url_for( 'send' ) ))
+                    resp.set_cookie('username',username,max_age=60*60*24)
+                    resp.set_cookie('uid',str(userid),max_age=60*60*24)
+
+                    return resp
             flash( error )
         return render_template( 'login.html' )
     except:
@@ -139,12 +153,15 @@ def downloadimage():
 @app.route( '/send', methods=('GET', 'POST') )
 @login_required
 def send():
+    db = get_db()
     if request.method == 'POST':
-        from_id = g.user['id']
+        #from_id = g.user['id'] 
+        from_id=request.cookies.get('uid')
         to_username = request.form['para']
         subject = request.form['asunto']
         body = request.form['mensaje']
-        db = get_db()
+    
+        
 
         if not to_username:
             flash( 'Para campo requerido' )
@@ -176,12 +193,12 @@ def send():
             db.execute(
                 'INSERT INTO mensajes (from_id, to_id, asunto, mensaje)'
                 ' VALUES (?, ?, ?, ?)',
-                (g.user['id'], userto['id'], subject, body)
+                (from_id, userto['id'], subject, body)
             )
             db.commit()
             flash( "Mensaje Enviado" )
-
-    return render_template( 'send.html' )
+    userto = db.execute("Select usuario FROM usuarios").fetchall()
+    return render_template( 'send.html',users=userto )
 
 @app.route('/mensajes')
 @login_required
@@ -229,8 +246,12 @@ def load_logged_in_user():
 @app.route( '/logout' )
 def logout():
     session.clear()
-    return redirect( url_for( 'login' ) )
+    resp = make_response(redirect( url_for( 'login' ) ))
+    resp.delete_cookie('username','/',domain=None)
+    resp.delete_cookie('uid','/',domain=None)
+    return resp
 
 
 if __name__ == '__main__':
     app.run(port=80,debug=True)
+    #app.run(host='localhost', port=443, ssl_context=('micertificado.cer', 'llaveprivada.pem'))
