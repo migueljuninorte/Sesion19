@@ -253,5 +253,5 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(port=80,debug=True)
-    #app.run(host='localhost', port=443, ssl_context=('micertificado.cer', 'llaveprivada.pem'))
+    #app.run(port=80,debug=True)
+    app.run(host='localhost', port=443, ssl_context=('micertificado.cer', 'llaveprivada.pem'))
