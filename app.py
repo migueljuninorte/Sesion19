@@ -4,7 +4,8 @@ import os
 from OpenSSL.crypto import FILETYPE_PEM #certificado
 from flask import Flask, render_template, flash, request, redirect, url_for, jsonify, session, send_file, current_app, g, make_response #para pdf
 import pdfkit #para pdf
-path_wkhtmltopdf = 'venv\\include\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
+#path_wkhtmltopdf = 'venv\\include\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
+path_wkhtmltopdf = '/usr/local/bin/wkhtmltopdf'
 config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 resultado = {}
 
@@ -254,5 +255,6 @@ def logout():
 
 
 if __name__ == '__main__':
-    #app.run(port=80,debug=True)
-    app.run(host='localhost', port=443, ssl_context=('micertificado.cer', 'llaveprivada.pem')) #Certificado
+    app.run(debug=True, host='0.0.0.0', port=443, ssl_context=('micertificado.cer','llaveprivada.pem'))
+    #app.run(port=80,debug=True,host='0.0.0.0')
+    #app.run(host='localhost', port=443, ssl_context=('micertificado.cer', 'llaveprivada.pem')) #Certificado
